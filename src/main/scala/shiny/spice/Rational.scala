@@ -1,3 +1,5 @@
+package shiny.spice
+
 class Rational(n: Int, d: Int) {
 
   require(d != 0)
@@ -40,8 +42,6 @@ class Rational(n: Int, d: Int) {
     new Rational(numer, denom * i)
 
   override def toString = numer + "/" + denom
-
-  implicit def intToRational(x: Int) = new Rational(x)
 
   private def gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
 }

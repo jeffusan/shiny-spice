@@ -1,4 +1,6 @@
-object multiTable extends App {
+package shiny.spice
+
+object mt extends App {
 
   def makeRowSeq(row: Int) =
     for (col <- 1 to 10) yield {
@@ -9,7 +11,7 @@ object multiTable extends App {
 
   def makeRow(row: Int) = makeRowSeq(row).mkString
 
-  def multiTable() = {
+  def mtm() = {
 
     val tableSeq =
       for (row <- 1 to 10)
