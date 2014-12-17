@@ -42,5 +42,22 @@ Scala does not use reference equality for these operators.
 
 eq in Scala compares referential equality.
 
+Tail Recursion
+=====
+
+Scala detects tail recursion (functions which call themselves recursively as their last action) and replaces it with a jump back to the beginning of the function. so there is no runtime overhead to be paid. One thing to watch out for is that this optimization will look different in a stack trace than you might expect! Because the recursive call is replaced with the optimization, a stacktrace will only display a single instruction set.
+
+Control Abstraction
+=====
+
+*higher-order functions* - functions that take functions as parameters
+
+*loan pattern* - a control abstraction, like a function, that lends something to another function. Like a function that creates a printwriter wrapped in a try/finally, that automatically closes the file once the argument function has completed.
+
+
+
+Other
+=====
+
 fsc = Fast Scala Compiler
 compiler daemon
