@@ -54,6 +54,14 @@ Control Abstraction
 
 *loan pattern* - a control abstraction, like a function, that lends something to another function. Like a function that creates a printwriter wrapped in a try/finally, that automatically closes the file once the argument function has completed.
 
+Composition and Inheritance
+=====
+
+What are the simple objects?
+In what ways can more interesting objects be constructed out of simpler ones?
+How do combinators hang together?
+What are the most general combinations?
+Do they satisfy any interesting laws?
 
 
 Other

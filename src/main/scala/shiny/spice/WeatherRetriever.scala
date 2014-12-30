@@ -27,7 +27,7 @@ class WeatherRetriever() {
         ("start", time.toString),
         ("cnt", "1"))
 
-      val weather = Http(url).params(params).asString
+      val weather = Http(url).timeout(connTimeoutMs = 5000, readTimeoutMs = 15000).params(params).asString
 
       val json:JsValue = Json.parse(weather.body)
 
@@ -39,9 +39,10 @@ class WeatherRetriever() {
     }
   }
 
-  def unixTime(zone:String, minus:Int) : String = {
+  def unixTime(zone:String, minus:Int) : Int = {
     val ut:Int =
-      DateTime.now(DateTimeZone.forID(zone)).minusHours(minus).getMillis().toInt / 1000
-    return ut.toString
+      (DateTime.now(DateTimeZone.forID(zone)).minusHours(minus).getMillis() / 1000).toInt
+    println(ut)
+    return ut
   }
 }
