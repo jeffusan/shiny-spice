@@ -1,11 +1,12 @@
 package shiny.spice
 
+import java.io.FileWriter
 import org.joda.time.DateTime.now
 import org.joda.time.DateTimeZone.forID
 import play.api.libs.json._
 import scalaj.http.Http
 import java.io.File
-import java.io.FileWriter
+
 
 // some test values
 //    ("1848354","Asia/Tokyo"),
@@ -64,7 +65,7 @@ object WeatherRetriever {
     val partial = withFileWriter(new File("output.sql"))_
 
     def writeIt(s:String) {
-      partial(writer => writer.write(s))
+      partial(writer => writer.write(s + "\n"))
     }
 
     results match {
