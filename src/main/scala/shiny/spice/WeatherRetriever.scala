@@ -1,27 +1,31 @@
 package shiny.spice
 
-import scalaj.http.Http
+import org.joda.time.DateTime.now
+import org.joda.time.DateTimeZone.forID
 import play.api.libs.json._
-import com.github.nscala_time.time.Imports._
-import java.io._
+import scalaj.http.Http
+import java.io.File
+import java.io.FileWriter
 
-class WeatherRetriever() {
-
-  val url = "http://api.openweathermap.org/data/2.5/history/city"
-
-  val writeIt = withFileWriter(new File("output.sql"))_
-
-  val cities = List(
-    ("1848354","Asia/Tokyo")) //,
+// some test values
+//    ("1848354","Asia/Tokyo"),
 //    ("4887158","America/Chicago"),
 //    ("4887398","America/Chicago"),
 //    ("5028509","America/Chicago"),
-//    ("4128894","America/Chicago"))
+//    ("4128894","America/Chicago")
+
+object WeatherRetriever {
+
+  val url = "http://api.openweathermap.org/data/2.5/history/city"
+
+  def unixTime(zone:String, minus:Int) : String = {
+    return ((now(forID(zone)).minusHours(minus).getMillis() / 1000).toInt).toString
+  }
 
   def retrieveWeather(cities: List[(String,String)]) {
     val city = cities.head
 
-    for(i <- 167 to 1 by -1) {
+    for(i <- 24 to 1 by -1) {
 
       val weather =
         Http(url).timeout(
@@ -36,9 +40,9 @@ class WeatherRetriever() {
 
       val json:JsValue = Json.parse(weather.body)
 
-      println("Json: " + json.toString)
+      val results = (json \ "list").asOpt[List[JsValue]]
 
-      writeIt(writer => writer.write(json.toString + "\n"))
+      process(results)
 
       if(cities.tail.size > 0) {
         retrieveWeather(cities.tail)
@@ -46,17 +50,34 @@ class WeatherRetriever() {
     }
   }
 
-  def withFileWriter(file: File)(op: FileWriter => Unit) {
-    val writer = new FileWriter(file, true)
-    try {
-      op(writer)
-    } finally {
-      writer.close()
+  def process(results:Option[List[JsValue]]) {
+
+    def withFileWriter(file: File)(op: FileWriter => Unit) {
+      val writer = new FileWriter(file, true)
+      try {
+        op(writer)
+      } finally {
+        writer.close()
+      }
     }
+
+    val partial = withFileWriter(new File("output.sql"))_
+
+    def writeIt(s:String) {
+      partial(writer => writer.write(s))
+    }
+
+    results match {
+      case s:Some[List[JsValue]] =>
+        val r:List[JsValue] = s.get
+        if(r.size > 0) {
+          println("some: " + r(0).toString)
+          writeIt(r(0).toString)
+        }
+      case None =>
+        println("No response")
+    }
+
   }
 
-
-  def unixTime(zone:String, minus:Int) : String = {
-    return ((DateTime.now(DateTimeZone.forID(zone)).minusHours(minus).getMillis() / 1000).toInt).toString
-  }
 }
