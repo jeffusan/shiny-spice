@@ -14,6 +14,7 @@ import java.io.File
 //    ("4887398","America/Chicago"),
 //    ("5028509","America/Chicago"),
 //    ("4128894","America/Chicago")
+// List(("1848354","Asia/Tokyo"),("4887158","America/Chicago"),("4887398","America/Chicago"),("5028509","America/Chicago"),("4128894","America/Chicago"))
 
 object WeatherRetriever {
 
@@ -26,7 +27,7 @@ object WeatherRetriever {
   def retrieveWeather(cities: List[(String,String)]) {
     val city = cities.head
 
-    for(i <- 24 to 1 by -1) {
+    for(i <- 167 to 1 by -1) { // 167 is the number of hours in a week minus 1
 
       val weather =
         Http(url).timeout(
@@ -43,7 +44,16 @@ object WeatherRetriever {
 
       val results = (json \ "list").asOpt[List[JsValue]]
 
-      process(results)
+      results match {
+        case s:Some[List[JsValue]] =>
+          val r:List[JsValue] = s.get
+          if(r.size > 0) {
+            println("some: " + r(0).toString)
+            process(json)
+          }
+        case None =>
+          println("No response")
+      }
 
       if(cities.tail.size > 0) {
         retrieveWeather(cities.tail)
@@ -51,7 +61,7 @@ object WeatherRetriever {
     }
   }
 
-  def process(results:Option[List[JsValue]]) {
+  def process(results:JsValue) {
 
     def withFileWriter(file: File)(op: FileWriter => Unit) {
       val writer = new FileWriter(file, true)
@@ -64,20 +74,7 @@ object WeatherRetriever {
 
     val partial = withFileWriter(new File("output.sql"))_
 
-    def writeIt(s:String) {
-      partial(writer => writer.write(s + "\n"))
-    }
-
-    results match {
-      case s:Some[List[JsValue]] =>
-        val r:List[JsValue] = s.get
-        if(r.size > 0) {
-          println("some: " + r(0).toString)
-          writeIt(r(0).toString)
-        }
-      case None =>
-        println("No response")
-    }
+    partial(writer => writer.write("insert into weather(data) values ('" + results.toString() + "');\n"))
 
   }
 
